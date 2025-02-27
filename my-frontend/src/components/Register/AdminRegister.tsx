@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TextField, Button, Typography, Box, IconButton } from "@mui/material";
@@ -6,20 +7,21 @@ import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import styles from "./Register.module.css";
 import { ArrowBack } from "@mui/icons-material";
+import toast from "react-hot-toast";
+import { passwordRules } from "../Login/const";
 
 // Validation Schema
 const adminSchema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+  password: passwordRules,
 });
 
 const AdminRegister = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -28,8 +30,24 @@ const AdminRegister = () => {
     resolver: yupResolver(adminSchema),
   });
 
-  const onSubmit = (data: any) => {
-    console.log("Admin Registration Data:", data);
+  const onSubmit = async (data: any) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        "http://localhost:5000/register-agent",
+        {
+          ...data,
+          role: "admin",
+        }
+      );
+
+      toast.success("Registration successful!");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,8 +94,14 @@ const AdminRegister = () => {
           fullWidth
         />
 
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Register
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={loading}
+        >
+          {loading ? "Registering..." : "Register"}
         </Button>
 
         <Typography variant="body2" sx={{ textAlign: "center", marginTop: 2 }}>
