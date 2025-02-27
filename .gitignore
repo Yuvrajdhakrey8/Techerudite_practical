@@ -1,0 +1,10 @@
+# Node.js
+my-backend/node_modules/
+my-backend/.env
+my-backend/package-lock.json
+
+
+# React
+my-frontend/node_modules/
+my-frontend/build/
+my-frontend/package-lock.json
